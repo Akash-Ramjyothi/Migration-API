@@ -2,6 +2,7 @@ package com.luv2code.aopdemo;
 
 import com.luv2code.aopdemo.dao.AccountDAO;
 import com.luv2code.aopdemo.dao.MembershipDAO;
+import com.luv2code.aopdemo.model.Account;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,48 +11,72 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class AopdemoApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(AopdemoApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(AopdemoApplication.class, args);
+    }
 
-	@Bean
-	public CommandLineRunner commandLineRunner(AccountDAO theAccountDAO, MembershipDAO theMembershipDAO) {
+    @Bean
+    public CommandLineRunner commandLineRunner(AccountDAO accountDAO, MembershipDAO membershipDAO) {
+        return runner -> runAopDemo(accountDAO, membershipDAO);
+    }
 
-		return runner -> {
+    /**
+     * Main demo orchestrator for AOP Before Advice
+     */
+    private void runAopDemo(AccountDAO accountDAO, MembershipDAO membershipDAO) {
 
-			demoTheBeforeAdvice(theAccountDAO, theMembershipDAO);
-		};
-	}
+        System.out.println("\n=== Running AOP @Before Advice Demo ===\n");
 
-	private void demoTheBeforeAdvice(AccountDAO theAccountDAO, MembershipDAO theMembershipDAO) {
+        processAccountOperations(accountDAO);
+        processMembershipOperations(membershipDAO);
 
-		// call the business method
-		Account myAccount = new Account();
-		myAccount.setName("Madhu");
-		myAccount.setLevel("Platinum");
+        System.out.println("\n=== Demo Completed ===\n");
+    }
 
-		theAccountDAO.addAccount(myAccount, true);
-		theAccountDAO.doWork();
+    /**
+     * Demonstrates AccountDAO operations
+     */
+    private void processAccountOperations(AccountDAO accountDAO) {
 
-		// call the accountdao getter/setter methods
-		theAccountDAO.setName("foobar");
-		theAccountDAO.setServiceCode("silver");
+        System.out.println("\n--- AccountDAO Operations ---");
 
-		String name = theAccountDAO.getName();
-		String code = theAccountDAO.getServiceCode();
+        Account account = createSampleAccount("Madhu", "Platinum");
 
-		// call the membership business method
-		theMembershipDAO.addSillyMember();
-		theMembershipDAO.goToSleep();
+        // Business method calls
+        accountDAO.addAccount(account, true);
+        accountDAO.doWork();
 
-	}
+        // Getter/Setter method calls (to test AOP exclusions if configured)
+        accountDAO.setName("foobar");
+        accountDAO.setServiceCode("silver");
 
+        String name = accountDAO.getName();
+        String serviceCode = accountDAO.getServiceCode();
+
+        System.out.println("Retrieved AccountDAO name: " + name);
+        System.out.println("Retrieved Service Code: " + serviceCode);
+    }
+
+    /**
+     * Demonstrates MembershipDAO operations
+     */
+    private void processMembershipOperations(MembershipDAO membershipDAO) {
+
+        System.out.println("\n--- MembershipDAO Operations ---");
+
+        membershipDAO.addSillyMember();
+        membershipDAO.goToSleep();
+    }
+
+    /**
+     * Factory method for Account object creation
+     */
+    private Account createSampleAccount(String name, String level) {
+
+        Account account = new Account();
+        account.setName(name);
+        account.setLevel(level);
+
+        return account;
+    }
 }
-
-
-
-
-
-
-
-
