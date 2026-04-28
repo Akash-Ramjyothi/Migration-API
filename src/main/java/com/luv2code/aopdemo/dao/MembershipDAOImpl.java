@@ -7,16 +7,32 @@ public class MembershipDAOImpl implements MembershipDAO {
 
     @Override
     public boolean addSillyMember() {
+        log("START addSillyMember");
 
-        System.out.println(getClass() + ": DOING MY DB WORK: ADDING A MEMBERSHIP ACCOUNT");
+        // Simulate DB operation
+        boolean isAdded = true;
 
-        return true;
+        log("END addSillyMember - status: " + isAdded);
+        return isAdded;
     }
 
     @Override
     public void goToSleep() {
+        log("START goToSleep");
 
-        System.out.println(getClass() + ": I'm going to sleep now...");
+        try {
+            Thread.sleep(1000); // simulate delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log("Sleep interrupted: " + e.getMessage());
+        }
 
+        log("END goToSleep");
+    }
+
+    // --- Helper Methods ---
+
+    private void log(String message) {
+        System.out.println(getClass().getSimpleName() + " :: " + message);
     }
 }
