@@ -8,49 +8,63 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.logging.Logger;
+
 @Aspect
 @Component
 @Order(2)
 public class MyDemoLoggingAspect {
 
+    private final Logger logger = Logger.getLogger(getClass().getName());
+
     @Before("com.luv2code.aopdemo.aspect.LuvAopExpressions.forDaoPackageNoGetterSetter()")
-    public void beforeAddAccountAdvice(JoinPoint theJoinPoint) {
-        System.out.println("\n=====>>> Executing @Before advice on method");
+    public void beforeAddAccountAdvice(JoinPoint joinPoint) {
 
-        // display the method signature
-        MethodSignature methodSignature = (MethodSignature) theJoinPoint.getSignature();
+        logMethodDetails(joinPoint);
+        logMethodArguments(joinPoint);
+    }
 
-        System.out.println("Method: " + methodSignature);
+    private void logMethodDetails(JoinPoint joinPoint) {
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
 
-        // display method arguments
+        logger.info("\n=====>>> Executing @Before advice");
+        logger.info("Method: " + methodSignature.toShortString());
+        logger.info("Declaring Type: " + methodSignature.getDeclaringTypeName());
+        logger.info("Return Type: " + methodSignature.getReturnType().getSimpleName());
+    }
 
-        // get args
-        Object[] args = theJoinPoint.getArgs();
+    private void logMethodArguments(JoinPoint joinPoint) {
+        Object[] args = joinPoint.getArgs();
 
-        // loop thru args
-        for (Object tempArg : args) {
-            System.out.println(tempArg);
+        if (args == null || args.length == 0) {
+            logger.info("No arguments passed.");
+            return;
+        }
 
-            if (tempArg instanceof Account) {
+        logger.info("Arguments: " + Arrays.toString(args));
 
-                // downcast and print Account specific stuff
-                Account theAccount = (Account) tempArg;
+        for (Object arg : args) {
+            if (arg == null) {
+                logger.warning("Null argument encountered");
+                continue;
+            }
 
-                System.out.println("account name: " + theAccount.getName());
-                System.out.println("account level: " + theAccount.getLevel());
+            logger.info("Argument Type: " + arg.getClass().getSimpleName());
+
+            if (arg instanceof Account account) {
+                logAccountDetails(account);
             }
         }
     }
 
+    private void logAccountDetails(Account account) {
+        logger.info("Account Details:");
+        logger.info(" - Name  : " + safeValue(account.getName()));
+        logger.info(" - Level : " + safeValue(account.getLevel()));
+    }
+
+    private String safeValue(String value) {
+        return value != null ? value : "N/A";
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
